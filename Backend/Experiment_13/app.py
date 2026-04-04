@@ -2,13 +2,26 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from marshmallow import Schema, fields, validate, ValidationError
 import pymysql
+import os
 
 pymysql.install_as_MySQLdb()
 
 app = Flask(__name__)
 
-# Update MySQL credentials below
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:0000@localhost:3300/chandigarh_university_db'
+# ===============================
+# DATABASE CONFIG (Railway Ready)
+# ===============================
+db_url = os.getenv("MYSQL_URL")
+
+# Fix driver issue (Railway gives mysql://)
+if db_url and db_url.startswith("mysql://"):
+    db_url = db_url.replace("mysql://", "mysql+pymysql://")
+
+# Fallback (optional - local testing)
+if not db_url:
+    db_url = "mysql+pymysql://root:password@localhost:3306/chandigarh_university_db"
+
+app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -104,10 +117,16 @@ def delete_student(id):
     db.session.commit()
     return jsonify({"message": "Student deleted successfully"})
 
+# ===============================
+# HOME ROUTE
+# ===============================
 @app.route('/')
 def home():
-    return jsonify({"message": "Flask MySQL Students CRUD API with Validation Running"})
+    return jsonify({"message": "Flask MySQL Students CRUD API Running 🚀"})
 
+# ===============================
+# RUN APP
+# ===============================
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
