@@ -13,13 +13,8 @@ app = Flask(__name__)
 # ===============================
 db_url = os.getenv("MYSQL_URL")
 
-# Fix driver issue (Railway gives mysql://)
 if db_url and db_url.startswith("mysql://"):
     db_url = db_url.replace("mysql://", "mysql+pymysql://")
-
-# Fallback (optional - local testing)
-if not db_url:
-    db_url = "mysql+pymysql://root:password@localhost:3306/chandigarh_university_db"
 
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -27,7 +22,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 # ===============================
-# Student Model
+# MODEL
 # ===============================
 class Student(db.Model):
     __tablename__ = "students"
@@ -45,7 +40,7 @@ class Student(db.Model):
         }
 
 # ===============================
-# Validation Schema
+# SCHEMA
 # ===============================
 class StudentSchema(Schema):
     name = fields.Str(required=True, validate=validate.Length(min=2))
@@ -56,15 +51,19 @@ student_schema = StudentSchema()
 student_update_schema = StudentSchema(partial=True)
 
 # ===============================
-# Global Error Handler
+# ERROR HANDLER
 # ===============================
 @app.errorhandler(ValidationError)
 def handle_validation_error(e):
     return jsonify({"validation_errors": e.messages}), 400
 
 # ===============================
-# CREATE Student
+# ROUTES
 # ===============================
+@app.route('/')
+def home():
+    return jsonify({"message": "API Running 🚀"})
+
 @app.route('/students', methods=['POST'])
 def create_student():
     data = request.get_json()
@@ -76,25 +75,16 @@ def create_student():
 
     return jsonify(student.to_dict()), 201
 
-# ===============================
-# READ All Students
-# ===============================
 @app.route('/students', methods=['GET'])
 def get_students():
     students = Student.query.all()
     return jsonify([s.to_dict() for s in students])
 
-# ===============================
-# READ One Student
-# ===============================
 @app.route('/students/<int:id>', methods=['GET'])
 def get_student(id):
     student = Student.query.get_or_404(id)
     return jsonify(student.to_dict())
 
-# ===============================
-# UPDATE Student
-# ===============================
 @app.route('/students/<int:id>', methods=['PUT'])
 def update_student(id):
     student = Student.query.get_or_404(id)
@@ -107,27 +97,21 @@ def update_student(id):
     db.session.commit()
     return jsonify(student.to_dict())
 
-# ===============================
-# DELETE Student
-# ===============================
 @app.route('/students/<int:id>', methods=['DELETE'])
 def delete_student(id):
     student = Student.query.get_or_404(id)
     db.session.delete(student)
     db.session.commit()
-    return jsonify({"message": "Student deleted successfully"})
+    return jsonify({"message": "Deleted successfully"})
 
 # ===============================
-# HOME ROUTE
+# CREATE TABLES (SAFE FOR DEPLOY)
 # ===============================
-@app.route('/')
-def home():
-    return jsonify({"message": "Flask MySQL Students CRUD API Running 🚀"})
+with app.app_context():
+    db.create_all()
 
 # ===============================
-# RUN APP
+# RUN (FOR LOCAL ONLY)
 # ===============================
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(debug=True)
