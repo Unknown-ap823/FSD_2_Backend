@@ -9,9 +9,9 @@ app = Flask(__name__)
 # ===============================
 # DATABASE CONFIG (Render PostgreSQL)
 # ===============================
-db_url = os.getenv("postgresql://db_23bis70035_experiment_13_db_user:j6OXHRWZc5EJz8zHLlWeGDQr3CG0KGeT@dpg-d79nbt0gjchc73fnmhj0-a/db_23bis70035_experiment_13_db")
+db_url = os.getenv("DATABASE_URL")  # ✅ correct usage
 
-# Fix for Render PostgreSQL
+# Fix Render PostgreSQL URL issue
 if db_url and db_url.startswith("postgres://"):
     db_url = db_url.replace("postgres://", "postgresql://")
 
@@ -87,7 +87,9 @@ def home():
 def health():
     return jsonify({"status": "OK"}), 200
 
+# ===============================
 # CREATE
+# ===============================
 @app.route('/students', methods=['POST'])
 def create_student():
     try:
@@ -110,7 +112,9 @@ def create_student():
             "message": "UID already exists"
         }), 400
 
-# READ ALL (with pagination)
+# ===============================
+# READ ALL (Pagination)
+# ===============================
 @app.route('/students', methods=['GET'])
 def get_students():
     page = request.args.get('page', 1, type=int)
@@ -125,7 +129,9 @@ def get_students():
         "data": [s.to_dict() for s in students.items]
     })
 
+# ===============================
 # READ ONE
+# ===============================
 @app.route('/students/<int:id>', methods=['GET'])
 def get_student(id):
     student = Student.query.get_or_404(id)
@@ -134,7 +140,9 @@ def get_student(id):
         "data": student.to_dict()
     })
 
+# ===============================
 # UPDATE
+# ===============================
 @app.route('/students/<int:id>', methods=['PUT'])
 def update_student(id):
     try:
@@ -160,7 +168,9 @@ def update_student(id):
             "message": "UID already exists"
         }), 400
 
+# ===============================
 # DELETE
+# ===============================
 @app.route('/students/<int:id>', methods=['DELETE'])
 def delete_student(id):
     student = Student.query.get_or_404(id)
@@ -180,7 +190,7 @@ with app.app_context():
     db.create_all()
 
 # ===============================
-# RUN
+# RUN (local only)
 # ===============================
 if __name__ == '__main__':
     app.run(debug=True)
