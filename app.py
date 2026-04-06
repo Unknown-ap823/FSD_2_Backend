@@ -9,7 +9,7 @@ app = Flask(__name__)
 # ===============================
 # DATABASE CONFIG (Render PostgreSQL)
 # ===============================
-db_url = os.getenv("DATABASE_URL")
+db_url = os.getenv("postgresql://db_23bis70035_experiment_13_db_user:j6OXHRWZc5EJz8zHLlWeGDQr3CG0KGeT@dpg-d79nbt0gjchc73fnmhj0-a/db_23bis70035_experiment_13_db")
 
 # Fix for Render PostgreSQL
 if db_url and db_url.startswith("postgres://"):
