@@ -103,8 +103,3 @@ FSD_2_Backend/
 - Implemented validations  
 - Tested APIs using Postman  
 - Deployed backend on Render  
-
----
-
-## 🏁 Conclusion
-This experiment demonstrates complete backend development workflow including API creation, validation, database integration, and deployment.
