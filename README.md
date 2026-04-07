@@ -40,7 +40,6 @@ Using Marshmallow:
 ## API URL
 https://two3bis70035-experiment-13.onrender.com
 
----
 
 ## 📸 Screenshots (Ordered)
 
